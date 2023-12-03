@@ -222,10 +222,10 @@ export async function fetchFilteredCustomers(query: string) {
   }
 }
 
-export async function getUser(email: string) {
+export async function getUser(email: string): Promise<User | undefined> {
   try {
-    const user = await sql`SELECT * FROM users WHERE email=${email}`;
-    return user.rows[0] as User;
+    const user = await sql<User>`SELECT * FROM users WHERE email=${email}`;
+    return user.rows[0];
   } catch (error) {
     console.error('Failed to fetch user:', error);
     throw new Error('Failed to fetch user.');
@@ -258,14 +258,12 @@ export async function putInvoiceById({ customer_id, amount, status, id }: Omit<I
 }
 
 export async function deleteInvoiceById(id: string) {
-  throw new Error('Failed to Delete Invoice');
-
   try {
     await sql`DELETE FROM invoices WHERE id = ${id}`;
   } catch (error) {
     console.error('Failed to delete invoice', error);
-    //throw new Error('Failed to delete invoice.');
-    return { message: 'Database Error: Failed to Delete Invoice' };
-
+    throw new Error('Failed to delete invoice.');
   }
 }
+
+

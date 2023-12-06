@@ -4,6 +4,7 @@ import { fetchInvoiceById, fetchCustomers } from '@/app/lib/data';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 
+//TODO: falta agregar validaciones al formulario
 export const metadata: Metadata = {
   title: 'Edit invoice',
 };

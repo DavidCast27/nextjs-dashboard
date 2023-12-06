@@ -16,7 +16,7 @@ const FormSchema = z.object({
 
 export const CreateInvoice = FormSchema.omit({ id: true, date: true });
 
-export const UpdateInvoice = FormSchema.omit({ id: true, date: true });
+export const UpdateInvoice = FormSchema.omit({ date: true });
 
 export const LoginSchema = z
   .object({ email: z.string().email(), password: z.string().min(6) })

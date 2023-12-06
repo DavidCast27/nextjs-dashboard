@@ -1,32 +1,21 @@
 'use server';
 
-import { CreateInvoice, UpdateInvoice } from "./shemas";
+import { CreateInvoice, LoginSchema, UpdateInvoice } from "./shemas";
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { deleteInvoiceById, postInvoice, putInvoiceById } from "./data";
-import { promises } from "dns";
 import { signIn } from "@/auth";
 import { AuthError } from "next-auth";
+import { InvoiceFormState } from "./definitions";
 
 
-// This is temporary until @types/react-dom is updated
-export type State = {
-  errors?: {
-    customerId?: string[];
-    amount?: string[];
-    status?: string[];
-  };
-  message?: string | null;
-};
-
-export async function createInvoice(prevState: State, formData: FormData) {
+export async function createInvoice(prevState: InvoiceFormState, formData: FormData) {
   // const rawFormData = Object.fromEntries(formData.entries())
   const validatedFields = CreateInvoice.safeParse({
     customerId: formData.get('customerId'),
     amount: formData.get('amount'),
     status: formData.get('status'),
   });
-  console.log('validatedFields', validatedFields)
 
   if (!validatedFields.success) {
     return {
@@ -49,12 +38,21 @@ export async function createInvoice(prevState: State, formData: FormData) {
   redirect('/dashboard/invoices');
 }
 
-export async function updateInvoice(id: string, formData: FormData) {
-  const { customerId, amount, status } = UpdateInvoice.parse({
+export async function updateInvoice(prevState: InvoiceFormState, formData: FormData) {
+  const validatedFields = UpdateInvoice.safeParse({
     customerId: formData.get('customerId'),
     amount: formData.get('amount'),
     status: formData.get('status'),
+    id: formData.get('id')
   });
+
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: 'Missing Fields. Failed to Update Invoice.',
+    };
+  }
+  const { customerId, amount, status, id } = validatedFields.data;
   const amountInCents = amount * 100;
   try {
     await putInvoiceById({ customer_id: customerId, amount: amountInCents, status, id })
